@@ -149,7 +149,7 @@ Add this to `~/.claude/CLAUDE.md`:
 
 ## Auto-Review Setup
 
-The repository includes automated r/claude scanning powered by **Gemini 3 Pro with Google Search**.
+The repository includes automated r/claude scanning powered by **Gemini 2.5 Flash with Google Search grounding**.
 
 ### How It Works
 
@@ -160,7 +160,7 @@ The repository includes automated r/claude scanning powered by **Gemini 3 Pro wi
                       │
                       ▼
 ┌─────────────────────────────────────────────────┐
-│  Gemini 3 Pro + Google Search                   │
+│  Gemini 2.5 Flash + Google Search                   │
 │  Searches r/claude, r/claudeai for:             │
 │  • Cost optimization tips                       │
 │  • Parallel agent patterns                      │
@@ -199,7 +199,7 @@ Repository → Actions → "Monthly r/claude Auto-Review" → Run workflow
 
 ### Cost
 
-~$0.01-0.05 per monthly run (Gemini 3 Pro pricing)
+~$0.01-0.05 per monthly run (Gemini 2.5 Flash pricing)
 
 ---
 
