@@ -14,6 +14,7 @@ A living repository of best practices for parallel autonomous coding with Claude
 - [Key Insights](#key-insights)
 - [Repository Structure](#repository-structure)
 - [Installation](#installation)
+- [Auto-Review Setup](#auto-review-setup)
 - [Monthly Review Process](#monthly-review-process)
 - [Cost Comparison](#cost-comparison)
 - [Tools & Resources](#tools--resources)
@@ -102,11 +103,13 @@ claude-best-practices/
 ├── README.md                           # This file
 ├── PARALLEL_CODING_BEST_PRACTICES.md   # Comprehensive guide
 ├── claude-snippet.md                   # Ready-to-copy CLAUDE.md config
+├── requirements.txt                    # Python dependencies
 ├── scripts/
+│   ├── auto_review.py                  # Gemini-powered auto-review
 │   └── review-rclaude.sh               # Opens r/claude searches
 └── .github/
     └── workflows/
-        └── monthly-review-reminder.yml # Auto-creates monthly issues
+        └── monthly-review-reminder.yml # Auto-review + PR creation
 ```
 
 ---
@@ -144,18 +147,75 @@ Add this to `~/.claude/CLAUDE.md`:
 
 ---
 
+## Auto-Review Setup
+
+The repository includes automated r/claude scanning powered by **Gemini 3 Pro with Google Search**.
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────┐
+│  GitHub Action (1st of month or manual)         │
+└─────────────────────┬───────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────┐
+│  Gemini 3 Pro + Google Search                   │
+│  Searches r/claude, r/claudeai for:             │
+│  • Cost optimization tips                       │
+│  • Parallel agent patterns                      │
+│  • New tools and techniques                     │
+└─────────────────────┬───────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────┐
+│  Creates PR with MONTHLY_UPDATE.md              │
+│  containing structured findings                 │
+└─────────────────────────────────────────────────┘
+```
+
+### Setup (One-Time)
+
+1. **Get a Gemini API Key:**
+   - Go to [Google AI Studio](https://aistudio.google.com/apikey)
+   - Create a new API key
+
+2. **Add to GitHub Secrets:**
+   ```
+   Repository → Settings → Secrets and variables → Actions → New repository secret
+
+   Name: GEMINI_API_KEY
+   Value: <your-api-key>
+   ```
+
+3. **Done!** The workflow will run automatically on the 1st of each month.
+
+### Manual Trigger
+
+To run immediately:
+```
+Repository → Actions → "Monthly r/claude Auto-Review" → Run workflow
+```
+
+### Cost
+
+~$0.01-0.05 per monthly run (Gemini 3 Pro pricing)
+
+---
+
 ## Monthly Review Process
 
 ### Automated (GitHub Actions)
 
-The workflow runs on the 1st of each month and creates an issue with:
-- Search links for r/claude, r/claudeai
-- Official documentation checklist
-- Community tool review items
+The workflow runs on the 1st of each month and:
+1. Searches r/claude and r/claudeai using Gemini + Google Search
+2. Summarizes findings into structured categories
+3. Creates a PR with `MONTHLY_UPDATE.md`
+4. You review and merge valuable insights
 
 ### Manual Review
 
-Run the helper script to open all search queries:
+Run the helper script to open all search queries manually:
 
 ```bash
 ./scripts/review-rclaude.sh
