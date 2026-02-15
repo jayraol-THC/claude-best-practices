@@ -1,0 +1,77 @@
+# Monthly Review Reminder for Claude Best Practices
+# This workflow creates an issue reminder to review r/claude for updates
+
+name: Monthly r/claude Review
+
+on:
+  schedule:
+    # Run on the 1st of every month at 9 AM UTC
+    - cron: '0 9 1 * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  create-review-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Create Review Issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const today = new Date();
+            const monthYear = today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            const issueBody = `## Monthly r/claude Review - ${monthYear}
+
+            Time for the monthly review of r/claude to update our parallel coding best practices!
+
+            ### Review Checklist
+
+            #### 1. Search r/claude for new tips
+            - [ ] Search: ["cost optimization" on r/claude](https://www.reddit.com/r/claude/search?q=cost%20optimization&restrict_sr=1&sort=new)
+            - [ ] Search: ["parallel agents" on r/claude](https://www.reddit.com/r/claude/search?q=parallel%20agents&restrict_sr=1&sort=new)
+            - [ ] Search: ["worktree" on r/claudeai](https://www.reddit.com/r/claudeai/search?q=worktree&restrict_sr=1&sort=new)
+            - [ ] Search: ["CLAUDE.md" on r/claude](https://www.reddit.com/r/claude/search?q=CLAUDE.md&restrict_sr=1&sort=new)
+            - [ ] Search: ["agent teams" on r/claude](https://www.reddit.com/r/claude/search?q=agent%20teams&restrict_sr=1&sort=new)
+            - [ ] Search: ["haiku sonnet cost" on r/claude](https://www.reddit.com/r/claude/search?q=haiku%20sonnet%20cost&restrict_sr=1&sort=new)
+
+            #### 2. Check Official Documentation
+            - [ ] [Best Practices](https://code.claude.com/docs/en/best-practices)
+            - [ ] [Agent Teams](https://code.claude.com/docs/en/agent-teams)
+            - [ ] [Cost Management](https://code.claude.com/docs/en/costs)
+            - [ ] [Changelog/Release Notes](https://code.claude.com/docs/en/changelog)
+
+            #### 3. Review Community Tools
+            - [ ] Check GitHub trending for Claude-related repos
+            - [ ] Review mentioned tools for updates:
+              - [ccswarm](https://github.com/nwiizo/ccswarm)
+              - [claude-flow](https://github.com/ruvnet/claude-flow)
+              - [wshobson/agents](https://github.com/wshobson/agents)
+
+            #### 4. Update Documentation
+            - [ ] Add any new techniques found
+            - [ ] Remove outdated practices
+            - [ ] Update cost ratios if pricing changed
+            - [ ] Update sources section
+
+            ### Notes from Review
+
+            <!-- Add your findings here -->
+
+            ### Changes Made
+
+            <!-- Link to PR if changes were made -->
+
+            ---
+            *This issue was automatically created by the monthly review workflow.*
+            `;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[Review] Monthly r/claude Best Practices Update - ${monthYear}`,
+              body: issueBody,
+              labels: ['documentation', 'review', 'monthly']
+            });
