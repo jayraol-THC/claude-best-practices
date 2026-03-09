@@ -303,27 +303,80 @@ def parse_args():
 
 
 def main():
+    args = parse_args()
+
     if not GEMINI_API_KEY:
         print("Error: GEMINI_API_KEY environment variable not set")
         exit(1)
 
-    print("Searching r/claude with Gemini 2.5 Flash + Google Search...")
+    # Phase 1: Search Reddit
+    print("Phase 1: Searching r/claude with Gemini 2.5 Flash + Google Search...")
     findings = search_and_summarize()
 
-    print("Generating update markdown...")
-    update_md = generate_update_markdown(findings)
+    if findings.get("parse_error"):
+        print("Error: Failed to parse search results")
+        print(findings.get("raw_response", "No response"))
+        exit(1)
 
-    print(f"Writing to {OUTPUT_FILE}...")
-    OUTPUT_FILE.write_text(update_md)
+    print(f"  Found {len(findings.get('findings', []))} insights")
+    print(f"  Found {len(findings.get('new_tools_mentioned', []))} new tools")
 
-    print("Done!")
-    print(f"\nFindings summary:")
-    if not findings.get("parse_error"):
-        print(f"- Categories found: {len(set(f.get('category', '') for f in findings.get('findings', [])))}")
-        print(f"- Total insights: {len(findings.get('findings', []))}")
-        print(f"- New tools: {len(findings.get('new_tools_mentioned', []))}")
-    else:
-        print("- JSON parsing failed, raw response saved")
+    # Legacy mode: just generate MONTHLY_UPDATE.md
+    if args.skip_merge:
+        print("\nGenerating MONTHLY_UPDATE.md (skip-merge mode)...")
+        update_md = generate_update_markdown(findings)
+        OUTPUT_FILE.write_text(update_md)
+        print(f"Written to {OUTPUT_FILE}")
+        return
+
+    # Phase 2: Merge into best practices doc
+    print("\nPhase 2: Merging findings into best practices document...")
+
+    if not BEST_PRACTICES_FILE.exists():
+        print(f"Error: Best practices file not found: {BEST_PRACTICES_FILE}")
+        exit(1)
+
+    current_doc = BEST_PRACTICES_FILE.read_text()
+
+    # Create backup
+    backup_path = create_backup(BEST_PRACTICES_FILE)
+    print(f"  Backup created: {backup_path}")
+
+    try:
+        merged_doc = merge_findings_into_document(findings, current_doc)
+
+        # Validate
+        is_valid, error = validate_merged_document(current_doc, merged_doc)
+        if not is_valid:
+            print(f"  Validation failed: {error}")
+            restore_from_backup(BEST_PRACTICES_FILE, backup_path)
+            print("  Restored from backup")
+            exit(1)
+
+        if args.dry_run:
+            print("\n--- DRY RUN: Would write the following changes ---")
+            print(f"Document length: {len(current_doc)} -> {len(merged_doc)} chars")
+            print("\nFirst 500 chars of merged doc:")
+            print(merged_doc[:500])
+            print("\n--- End dry run ---")
+            backup_path.unlink()  # Clean up backup
+            return
+
+        # Write merged document
+        BEST_PRACTICES_FILE.write_text(merged_doc)
+        print(f"  Updated: {BEST_PRACTICES_FILE}")
+
+        # Clean up backup on success
+        backup_path.unlink()
+        print("  Backup removed (success)")
+
+    except Exception as e:
+        print(f"  Error during merge: {e}")
+        restore_from_backup(BEST_PRACTICES_FILE, backup_path)
+        print("  Restored from backup")
+        exit(1)
+
+    print("\nDone!")
 
 
 if __name__ == "__main__":
