@@ -194,7 +194,58 @@ Review the findings above and:
 
 def merge_findings_into_document(findings: dict, current_doc: str) -> str:
     """Use Gemini to intelligently merge findings into the best practices document."""
-    raise NotImplementedError("Merge logic not yet implemented")
+
+    client = genai.Client(api_key=GEMINI_API_KEY)
+
+    current_date = datetime.now().strftime("%B %Y")
+    findings_json = json.dumps(findings, indent=2)
+
+    prompt = f"""You are updating a best practices document with new community findings.
+
+RULES:
+1. Preserve the existing structure and formatting EXACTLY
+2. Only ADD new information, never remove existing content
+3. Skip findings that duplicate or closely match existing content
+4. New insights should be added as bullet points or paragraphs in the relevant section
+
+CATEGORY MAPPING:
+- "Cost Optimization" findings → "Cost-Efficient Model Routing" section
+- "Parallel Agents" findings → "Parallel Agent Architecture" section
+- "Context Management" findings → "Context Management" section
+- "Configuration" findings → "CLAUDE.md Optimization" section
+- "Tools" findings → Add to the relevant tools table in "Git Worktree Isolation" or create inline mention
+
+FORMATTING:
+- Prefix new insights with **New ({current_date}):** for visibility
+- Update the "Last Updated" date in the header to {datetime.now().strftime("%Y-%m-%d")}
+- Add any new sources to the Sources section at the bottom
+- For new tools, add a row to the existing tools table if one exists in that section
+
+CURRENT DOCUMENT:
+```markdown
+{current_doc}
+```
+
+NEW FINDINGS TO MERGE:
+```json
+{findings_json}
+```
+
+OUTPUT:
+Return ONLY the complete updated markdown document. No explanations, no code blocks around it.
+"""
+
+    config = types.GenerateContentConfig(
+        temperature=0.3,  # Lower temperature for more consistent output
+    )
+
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config=config,
+    )
+
+    return response.text.strip()
 
 
 def main():
