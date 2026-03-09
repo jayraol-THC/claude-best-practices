@@ -18,6 +18,14 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 BEST_PRACTICES_FILE = Path(__file__).parent.parent / "PARALLEL_CODING_BEST_PRACTICES.md"
 OUTPUT_FILE = Path(__file__).parent.parent / "MONTHLY_UPDATE.md"
 
+REQUIRED_SECTIONS = [
+    "Cost-Efficient Model Routing",
+    "Parallel Agent Architecture",
+    "Git Worktree Isolation",
+    "CLAUDE.md Optimization",
+    "Context Management",
+]
+
 SEARCH_TOPICS = [
     "cost optimization Claude Code",
     "parallel agents Claude",
@@ -182,6 +190,11 @@ Review the findings above and:
 """
 
     return md
+
+
+def merge_findings_into_document(findings: dict, current_doc: str) -> str:
+    """Use Gemini to intelligently merge findings into the best practices document."""
+    raise NotImplementedError("Merge logic not yet implemented")
 
 
 def main():
