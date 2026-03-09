@@ -260,7 +260,14 @@ Return ONLY the complete updated markdown document. No explanations, no code blo
         config=config,
     )
 
-    return response.text.strip()
+    result = response.text.strip()
+
+    # Remove any markdown code block wrapper if present
+    if result.startswith("```"):
+        result = re.sub(r"^```(?:markdown)?\n?", "", result)
+        result = re.sub(r"\n?```$", "", result)
+
+    return result.strip()
 
 
 def validate_merged_document(original: str, merged: str) -> tuple[bool, str]:
@@ -277,8 +284,9 @@ def validate_merged_document(original: str, merged: str) -> tuple[bool, str]:
         if section not in merged:
             return False, f"Missing required section: {section}"
 
-    # Check it starts with expected header
-    if not merged.startswith("# Parallel Autonomous Coding"):
+    # Check it starts with expected header (strip leading whitespace/newlines)
+    merged_stripped = merged.lstrip()
+    if not merged_stripped.startswith("# Parallel Autonomous Coding"):
         return False, "Document doesn't start with expected title"
 
     return True, ""

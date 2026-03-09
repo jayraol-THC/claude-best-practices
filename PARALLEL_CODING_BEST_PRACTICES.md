@@ -1,6 +1,6 @@
 # Parallel Autonomous Coding with Claude: Best Practices
 
-> **Last Updated:** 2026-02-15
+> **Last Updated:** 2026-03-09
 > **Source:** Community insights from r/claude, r/claudeai, and developer blogs
 > **Review Schedule:** Monthly (see [Review Process](#review-process))
 
@@ -33,6 +33,8 @@ Reserve expensive models for critical tasks; use cheaper models for volume work:
 | Orchestration, routing, simple tasks | Haiku | ~25x cheaper |
 | Syntax validation, linting | Haiku | ~25x cheaper |
 
+**New (March 2026):** Claude Opus 4.5 introduces an 'effort parameter' that allows dynamic control over the model's reasoning depth and token consumption. Default to 'high' effort for maximum quality, then strategically decrease to 'medium' (20-40% reduction) or 'low' (50-70% reduction) for simpler tasks where speed or cost is a priority.
+
 ### Intelligent Routing Rules
 
 ```
@@ -44,12 +46,23 @@ ELSE:
 
 **Key insight from community:** "Use the cheap, fast model until it hurts; use the careful, pricier one where it matters; measure everything; route accordingly."
 
+**New (March 2026):** Implement prompt discipline to minimize unnecessary token usage, and explore caching mechanisms for repeated operations to further reduce costs.
+
 ### Metrics to Track
 
 - p95 latency per model
 - Token counts per task type
 - Validation pass rates
 - Escalation frequency from Haiku → Sonnet → Opus
+
+**New (March 2026):** Regularly check console.anthropic.com to monitor token usage and configure budget alerts to be notified before exceeding your desired spending limits.
+
+### Cost Management Tools
+
+**New (March 2026):**
+| Tool | Description |
+|------|-------------|
+| **RelayPlane / proxy** | Open source cost intelligence proxy for AI agents that cuts costs by ~80% with smart model routing. It includes a dashboard and policy engine and supports 11 providers. |
 
 ---
 
@@ -63,6 +76,12 @@ ELSE:
 | Tight dependencies between tasks | Single session or sequential sub-agents |
 | Independent, parallelizable work | Multi-agent teams |
 | Workers don't need to communicate | Single agents, not Agent Teams |
+
+**New (March 2026):** Claude Code's Agent Teams feature, introduced with Opus 4.6, enables multiple AI agents to work in parallel on the same project, communicate directly, and self-coordinate. This architecture supports structured coordination where a lead agent assigns tasks to independent teammates, each with their own context window and tools. Activate Agent Teams by setting `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` to '1' in your `settings.json` file (either globally or project-specific). Use shared task lists (viewable with Ctrl+T) and mailbox messaging for inter-agent communication.
+
+**New (March 2026):** A plugin for Claude Code allows the main agent to act as a parallel coding orchestrator, spawning up to 5 parallel Task agents per batch. Each sub-agent operates in its own git worktree, ensuring isolated branches and zero merge conflicts, effectively functioning like a small, concurrent development team. Look for or develop a `/delegate` skill that can spawn parallel sub-agents, configuring each to work within its own `git worktree` for isolated development and streamlined integration.
+
+**New (March 2026):** Claude Code now supports asynchronous execution for sub-agents, allowing the main agent to spawn sub-agents for tasks and then continue working on other tasks without blocking the session. This true parallel AI development boosts throughput. When Claude spawns a sub-agent, press `Ctrl+B` to move it to the background, enabling you to continue interacting with the main agent while the sub-agent completes its task independently.
 
 ### Role-Based Agent Configuration
 
@@ -83,12 +102,16 @@ Effective parallel setups from r/claude discussions:
 └────────┘  └────────┘   └────────┘   └────────┘
 ```
 
+**New (March 2026):** Sub-agents are specialized workers spawned by the main session, each operating in its own isolated context with personalized system prompts and tools. This approach prevents context pollution of the main conversation, enables parallel execution, and allows for task specialization. Delegate research or focused development tasks to sub-agents to keep the main agent's context clean. Configure sub-agents with specific tools and models (e.g., Haiku for speed) relevant to their specialized function.
+
 ### Agent Definition Best Practices
 
 Always include in agent configs:
 - Clear role description
 - **"When NOT to use" section** - prevents unnecessary sub-agent spawning
 - Complete context in invocation (sub-agents can't ask clarifying questions)
+
+**New (March 2026):** When building an orchestrator with subagents using the Claude Agent SDK, ensure the orchestrator's `system_prompt` is set to `claude_code` preset, register agents programmatically via the `agents={}` parameter, and include 'Task' in `allowed_tools`.
 
 ### Communication Hub Pattern
 
@@ -109,6 +132,12 @@ Instead of complex orchestration frameworks, use a **shared planning document**:
 - Using REST over GraphQL (decided 2026-02-14)
 ```
 
+### Agent Orchestration Tools/Skills
+
+**New (March 2026):**
+- **agent-mux:** A skill and SDK (CLI wrappers) for Claude Code that enables subagents to use other subagents, supporting nested agent structures.
+- **ClaudeFast Code Kit:** Implements a plan-then-execute pipeline with its `/team-build` command, coordinating 18 specialized agents through dependency chains for organized background work and eliminating blocking.
+
 ---
 
 ## Git Worktree Isolation
@@ -119,6 +148,8 @@ Each agent gets an isolated workspace, preventing:
 - File conflicts
 - Lock contention
 - State pollution between agents
+
+**New (March 2026):** Combining Git Worktree with multiple Claude Code sessions can significantly increase development efficiency by 2-3 times.
 
 ### Setup Pattern
 
@@ -134,6 +165,10 @@ cd ../project-backend && claude
 cd ../project-tests && claude
 ```
 
+**New (March 2026):** For parallel tasks, ensure clear instructions to the AI about its current branch to avoid confusion and manage potential merge conflicts later.
+
+**New (March 2026):** A known issue in Claude Code involves duplicate skill registration when working inside a git worktree, as skills from both the worktree and the main repository's working tree are discovered. Be aware of this bug; if encountering duplicate skills, consider restructuring your `.claude/commands/` setup or monitoring for official patches from Anthropic.
+
 ### Tools from Community
 
 | Tool | Description |
@@ -142,6 +177,9 @@ cd ../project-tests && claude
 | **ccswarm** | Multi-agent orchestration using Claude Code CLI with Git worktree isolation |
 | **worktree-cli** | MCP server integration for AI workflows |
 | **agentree** | Lightweight worktree management for AI agents |
+| **New (March 2026):** **swarmclaw** | A self-hosted AI agent orchestration dashboard with OpenClaw integration, multi-provider support, LangGraph workflows, and chat platform connectors. |
+| **New (March 2026):** **Kanban Code** | A native macOS application designed to manage Claude Code agents, allowing multiple agents to run in parallel. It links tasks to Claude sessions, git worktrees, tmux terminals, and GitHub PRs, with cards flowing through a Kanban board. |
+| **New (March 2026):** **Claude Code Studio** | A platform that transforms AI-assisted development by managing a queue of work, spawning and coordinating specialized agents in parallel, and includes features like automatic file locking for safe concurrent operations. |
 
 ---
 
@@ -177,6 +215,12 @@ cd ../project-tests && claude
 - [Project-specific pitfalls]
 ```
 
+**New (March 2026):** CLAUDE.md can be placed at the project root, in subdirectories for monorepos, or globally. Keep it concise, ideally under 200 lines, to ensure Claude processes it effectively.
+
+**New (March 2026):** CLAUDE.md can be used to define prompting strategies, such as 'Thinking' keywords (e.g., 'Think step-by-step', 'Analyze the root cause') to encourage deeper reasoning. It also serves as a place for debugging tactics like clear context resets and explicit path/filename instructions. Include 'Thinking' keywords in your prompts and define debugging steps in CLAUDE.md, such as instructing the agent to 'check the logs' or 'run the command with verbose output' when stuck.
+
+**New (March 2026):** For scheduled tasks, write specific instructions in CLAUDE.md, such as 'Read all PDF and DOCX files in ~/inbox/, classify them by content type using the rules in .claude-md, move them to the appropriate subfolder in ~/sorted/, and generate a summary report' instead of vague commands.
+
 ### Anti-Patterns to Avoid
 
 - Bloated files that Claude ignores
@@ -194,6 +238,9 @@ cd ../project-tests && claude
 2. **Disable unused MCP servers** - Each adds tool definitions to context (`/mcp` to manage)
 3. **Prefer CLI over MCP** - `gh`, `aws`, `gcloud` don't add context overhead
 4. **Enable sandbox mode** - Reduces permission prompts (`/sandbox`)
+**New (March 2026):**
+5. **Optimizing Token Usage through Sub-Agent Delegation:** Identify routine or context-heavy operations (e.g., Git operations, specific data parsing) and implement sub-agents that use dedicated scripts or tools to handle them, reducing the main agent's token consumption.
+6. **Minimizing Context Window Pressure with Small Contexts:** To prevent 'context rot' and degraded model performance, instruct agents to locate and focus only on relevant files using tools like `grep` or `find`, rather than feeding the entire codebase.
 
 ### Context Cost Comparison
 
@@ -210,6 +257,10 @@ Sub-agents have **temporary context windows**. Craft invocations that are:
 - Complete (all necessary information included)
 - Self-contained (no need for follow-up questions)
 - Scoped (focused on specific task)
+
+### Structured Memory System
+
+**New (March 2026):** Traditional flat `MEMORY.md` files have limitations (200-line cap, no structure, no session continuity, no multi-agent coordination). A structured directory of markdown files, including an index `MEMORY.md` pointing to topic files and an `active-work.md` for multi-agent coordination, can significantly improve context management. Create a `memory/` directory in your Claude project config. Populate it with an index `MEMORY.md` and topic-specific markdown files. Include an `active-work.md` for agents to update their current tasks, and instruct Claude via `CLAUDE.md` to continuously read and write to this context layer.
 
 ---
 
@@ -288,6 +339,21 @@ git log --oneline -- PARALLEL_CODING_BEST_PRACTICES.md
 - [Claude Code Agent Teams Docs](https://code.claude.com/docs/en/agent-teams)
 - [Haiku vs Sonnet Cost Analysis](https://medium.com/@cognidownunder/claude-haiku-4-5-matches-sonnets-coding-skills-at-80-less-cost-changes-everything-297f4b163d4e)
 - [Building a C Compiler with Parallel Claudes - Anthropic](https://www.anthropic.com/engineering/building-c-compiler)
+- Aditya Bawankule, February 2026
+- Claude Code Async, February 2026
+- CSDN blog, February 2026
+- Dev.to, March 2026
+- Engr Mejba Ahmed, February 2026
+- GitHub Issue, February 2026
+- Just Vibin' blog, January 2026
+- LobeHub Skills Marketplace, February 2026
+- Medium, February 2026
+- Pasquale Pillitteri, February 2026
+- r/ClaudeAI, February 2026
+- SitePoint, February 2026
+- The Complete Guide to CLAUDE.md, February 2026
+- YouTube, March 2026
+- 稀土掘金, February 2026
 
 ---
 
