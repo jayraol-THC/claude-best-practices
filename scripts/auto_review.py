@@ -4,6 +4,7 @@ Auto-review r/claude for new best practices using Gemini with Google Search grou
 Uses the new google-genai SDK (not the deprecated google-generativeai).
 """
 
+import argparse
 import os
 import json
 import re
@@ -281,6 +282,24 @@ def validate_merged_document(original: str, merged: str) -> tuple[bool, str]:
         return False, "Document doesn't start with expected title"
 
     return True, ""
+
+
+def parse_args():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Auto-review r/claude and merge findings into best practices doc"
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print diff without writing changes"
+    )
+    parser.add_argument(
+        "--skip-merge",
+        action="store_true",
+        help="Only generate MONTHLY_UPDATE.md without merging (legacy behavior)"
+    )
+    return parser.parse_args()
 
 
 def main():
