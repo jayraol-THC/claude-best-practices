@@ -248,6 +248,27 @@ Return ONLY the complete updated markdown document. No explanations, no code blo
     return response.text.strip()
 
 
+def validate_merged_document(original: str, merged: str) -> tuple[bool, str]:
+    """Validate the merged document meets safety requirements.
+
+    Returns (is_valid, error_message).
+    """
+    # Check minimum length (80% of original)
+    if len(merged) < len(original) * 0.8:
+        return False, f"Merged doc too short: {len(merged)} chars vs {len(original)} original (min 80%)"
+
+    # Check required sections exist
+    for section in REQUIRED_SECTIONS:
+        if section not in merged:
+            return False, f"Missing required section: {section}"
+
+    # Check it starts with expected header
+    if not merged.startswith("# Parallel Autonomous Coding"):
+        return False, "Document doesn't start with expected title"
+
+    return True, ""
+
+
 def main():
     if not GEMINI_API_KEY:
         print("Error: GEMINI_API_KEY environment variable not set")
