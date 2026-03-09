@@ -13,6 +13,20 @@ from pathlib import Path
 from google import genai
 from google.genai import types
 
+
+def create_backup(file_path: Path) -> Path:
+    """Create a backup of the file before modifying."""
+    backup_path = file_path.with_suffix(file_path.suffix + ".bak")
+    backup_path.write_text(file_path.read_text())
+    return backup_path
+
+
+def restore_from_backup(file_path: Path, backup_path: Path) -> None:
+    """Restore file from backup."""
+    file_path.write_text(backup_path.read_text())
+    backup_path.unlink()  # Remove backup after restore
+
+
 # Configuration
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 BEST_PRACTICES_FILE = Path(__file__).parent.parent / "PARALLEL_CODING_BEST_PRACTICES.md"
