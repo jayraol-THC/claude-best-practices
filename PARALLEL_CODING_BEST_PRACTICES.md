@@ -1,6 +1,6 @@
 # Parallel Autonomous Coding with Claude: Best Practices
 
-> **Last Updated:** 2026-03-09
+> **Last Updated:** 2026-04-01
 > **Source:** Community insights from r/claude, r/claudeai, and developer blogs
 > **Review Schedule:** Monthly (see [Review Process](#review-process))
 
@@ -47,6 +47,7 @@ ELSE:
 **Key insight from community:** "Use the cheap, fast model until it hurts; use the careful, pricier one where it matters; measure everything; route accordingly."
 
 **New (March 2026):** Implement prompt discipline to minimize unnecessary token usage, and explore caching mechanisms for repeated operations to further reduce costs.
+**New (April 2026):** For cost optimization, route basic, routine tasks like cron jobs to more economical models such as Haiku and Sonnet, reserving the higher-cost Opus model only for critical or complex problem-solving.
 
 ### Metrics to Track
 
@@ -82,6 +83,7 @@ ELSE:
 **New (March 2026):** A plugin for Claude Code allows the main agent to act as a parallel coding orchestrator, spawning up to 5 parallel Task agents per batch. Each sub-agent operates in its own git worktree, ensuring isolated branches and zero merge conflicts, effectively functioning like a small, concurrent development team. Look for or develop a `/delegate` skill that can spawn parallel sub-agents, configuring each to work within its own `git worktree` for isolated development and streamlined integration.
 
 **New (March 2026):** Claude Code now supports asynchronous execution for sub-agents, allowing the main agent to spawn sub-agents for tasks and then continue working on other tasks without blocking the session. This true parallel AI development boosts throughput. When Claude spawns a sub-agent, press `Ctrl+B` to move it to the background, enabling you to continue interacting with the main agent while the sub-agent completes its task independently.
+**New (April 2026):** The industry trend in early 2026 indicates that running multiple specialized agents simultaneously on different parts of a codebase has become standard practice for major AI coding tools. Multi-agent systems with specialized roles (e.g., Architect, Developer, Tester) significantly outperform single-agent approaches, with Claude Code supporting 10+ simultaneous instances for coordinated development.
 
 ### Role-Based Agent Configuration
 
@@ -112,6 +114,7 @@ Always include in agent configs:
 - Complete context in invocation (sub-agents can't ask clarifying questions)
 
 **New (March 2026):** When building an orchestrator with subagents using the Claude Agent SDK, ensure the orchestrator's `system_prompt` is set to `claude_code` preset, register agents programmatically via the `agents={}` parameter, and include 'Task' in `allowed_tools`.
+**New (April 2026):** Claude Code has introduced 'New Agent Skills' with a 'Skill-Creator' that automates the generation, testing, and improvement of agent capabilities. Additionally, 'Ultra Mode' for Opus 4.6 and Sonnet 4.6 allows these models to 'think deeper' by utilizing a larger reasoning budget for complex coding tasks. Explore the Skill-Creator to develop custom agent skills and activate 'Ultra Mode' for Opus or Sonnet when tackling particularly challenging coding problems to benefit from deeper reasoning.
 
 ### Communication Hub Pattern
 
@@ -137,6 +140,7 @@ Instead of complex orchestration frameworks, use a **shared planning document**:
 **New (March 2026):**
 - **agent-mux:** A skill and SDK (CLI wrappers) for Claude Code that enables subagents to use other subagents, supporting nested agent structures.
 - **ClaudeFast Code Kit:** Implements a plan-then-execute pipeline with its `/team-build` command, coordinating 18 specialized agents through dependency chains for organized background work and eliminating blocking.
+**New (April 2026):** Claude Code now includes a `/simplify` command that can automatically clean up code diffs by leveraging parallel agents, streamlining the code review and refinement process. Integrate this command into your workflow to utilize Claude Code's parallel processing capabilities for diff cleanup.
 
 ---
 
@@ -187,9 +191,9 @@ cd ../project-tests && claude
 
 ### Core Principles
 
-1. **Keep it concise** - For each line, ask "Would removing this cause Claude to make mistakes?" If not, cut it.
-2. **Human-readable** - No special format required
-3. **Project-specific** - Focus on YOUR project's patterns
+1.  **Keep it concise** - For each line, ask "Would removing this cause Claude to make mistakes?" If not, cut it.
+2.  **Human-readable** - No special format required
+3.  **Project-specific** - Focus on YOUR project's patterns
 
 ### Recommended Structure
 
@@ -234,13 +238,14 @@ cd ../project-tests && claude
 
 ### Token Conservation Techniques
 
-1. **Use `/clear` frequently** - Wipe context when switching tasks
-2. **Disable unused MCP servers** - Each adds tool definitions to context (`/mcp` to manage)
-3. **Prefer CLI over MCP** - `gh`, `aws`, `gcloud` don't add context overhead
-4. **Enable sandbox mode** - Reduces permission prompts (`/sandbox`)
+1.  **Use `/clear` frequently** - Wipe context when switching tasks
+2.  **Disable unused MCP servers** - Each adds tool definitions to context (`/mcp` to manage)
+3.  **Prefer CLI over MCP** - `gh`, `aws`, `gcloud` don't add context overhead
+4.  **Enable sandbox mode** - Reduces permission prompts (`/sandbox`)
 **New (March 2026):**
-5. **Optimizing Token Usage through Sub-Agent Delegation:** Identify routine or context-heavy operations (e.g., Git operations, specific data parsing) and implement sub-agents that use dedicated scripts or tools to handle them, reducing the main agent's token consumption.
-6. **Minimizing Context Window Pressure with Small Contexts:** To prevent 'context rot' and degraded model performance, instruct agents to locate and focus only on relevant files using tools like `grep` or `find`, rather than feeding the entire codebase.
+5.  **Optimizing Token Usage through Sub-Agent Delegation:** Identify routine or context-heavy operations (e.g., Git operations, specific data parsing) and implement sub-agents that use dedicated scripts or tools to handle them, reducing the main agent's token consumption.
+6.  **Minimizing Context Window Pressure with Small Contexts:** To prevent 'context rot' and degraded model performance, instruct agents to locate and focus only on relevant files using tools like `grep` or `find`, rather than feeding the entire codebase.
+**New (April 2026):** Claude Code's Opus 4.5 model offers a substantial 200K context window, enabling it to handle extensive codebases and complex problems. Leverage this large context window for deep reasoning on complex issues, but consciously switch to lower-cost models for less demanding tasks to manage token usage and optimize costs.
 
 ### Context Cost Comparison
 
@@ -271,6 +276,7 @@ Sub-agents have **temporary context windows**. Craft invocations that are:
 - Heavy daily usage (multiple hours)
 - Predictable workload
 - Cost predictability more important than flexibility
+**New (April 2026):** Claude Code subscriptions start at $20/month, with heavy users potentially incurring costs of $100-200/month.
 
 ### When to Use API
 
@@ -295,28 +301,28 @@ Batch processing → API with smart routing
 
 Run this review on the **1st of each month**:
 
-1. **Search r/claude for new tips:**
-   ```
-   Search queries:
-   - "cost optimization" site:reddit.com/r/claude
-   - "parallel agents" site:reddit.com/r/claude
-   - "worktree" site:reddit.com/r/claudeai
-   - "CLAUDE.md tips" site:reddit.com/r/claude
-   ```
+1.  **Search r/claude for new tips:**
+    ```
+    Search queries:
+    - "cost optimization" site:reddit.com/r/claude
+    - "parallel agents" site:reddit.com/r/claude
+    - "worktree" site:reddit.com/r/claudeai
+    - "CLAUDE.md tips" site:reddit.com/r/claude
+    ```
 
-2. **Check official docs for updates:**
-   - https://code.claude.com/docs/en/best-practices
-   - https://code.claude.com/docs/en/agent-teams
-   - https://code.claude.com/docs/en/costs
+2.  **Check official docs for updates:**
+    - https://code.claude.com/docs/en/best-practices
+    - https://code.claude.com/docs/en/agent-teams
+    - https://code.claude.com/docs/en/costs
 
-3. **Review community tools:**
-   - Check GitHub stars/activity for mentioned tools
-   - Look for new orchestration frameworks
+3.  **Review community tools:**
+    - Check GitHub stars/activity for mentioned tools
+    - Look for new orchestration frameworks
 
-4. **Update this document:**
-   - Add new techniques with source attribution
-   - Remove outdated practices
-   - Update cost ratios if pricing changes
+4.  **Update this document:**
+    - Add new techniques with source attribution
+    - Remove outdated practices
+    - Update cost ratios if pricing changes
 
 ### Tracking Changes
 
@@ -354,12 +360,14 @@ git log --oneline -- PARALLEL_CODING_BEST_PRACTICES.md
 - The Complete Guide to CLAUDE.md, February 2026
 - YouTube, March 2026
 - 稀土掘金, February 2026
+- r/openclaw, March 2026
+- YouTube (intheworldofai), March 2026
 
 ---
 
 ## Contributing
 
 Found a new tip on r/claude? Open a PR with:
-1. The technique/tip
-2. Source link
-3. Your experience using it (optional)
+1.  The technique/tip
+2.  Source link
+3.  Your experience using it (optional)
