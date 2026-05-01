@@ -1,6 +1,6 @@
 # Parallel Autonomous Coding with Claude: Best Practices
 
-> **Last Updated:** 2026-03-09
+> **Last Updated:** 2026-05-01
 > **Source:** Community insights from r/claude, r/claudeai, and developer blogs
 > **Review Schedule:** Monthly (see [Review Process](#review-process))
 
@@ -56,6 +56,8 @@ ELSE:
 - Escalation frequency from Haiku → Sonnet → Opus
 
 **New (March 2026):** Regularly check console.anthropic.com to monitor token usage and configure budget alerts to be notified before exceeding your desired spending limits.
+**New (May 2026):** The `/insights` command analyzes the last 30 days of Claude Code usage, providing detailed reports on usage patterns, cost breakdown, tool utilization, and workflow inefficiencies. It helps identify wasted tokens and duplicated efforts, leading to significant time and cost savings. Run `/insights` in your Claude Code session to understand and optimize your token consumption and workflow.
+**New (May 2026):** The 'Rewind' feature helps eliminate the cost associated with experimentation by allowing users to revert changes. The `/loop` command enables setting up cron-like jobs within the terminal, automating repetitive tasks on a schedule, which can improve efficiency and reduce manual effort and associated costs. Experiment with the 'Rewind' feature for safe exploration and use `/loop` to automate routine tasks to save time and tokens.
 
 ### Cost Management Tools
 
@@ -83,6 +85,8 @@ ELSE:
 
 **New (March 2026):** Claude Code now supports asynchronous execution for sub-agents, allowing the main agent to spawn sub-agents for tasks and then continue working on other tasks without blocking the session. This true parallel AI development boosts throughput. When Claude spawns a sub-agent, press `Ctrl+B` to move it to the background, enabling you to continue interacting with the main agent while the sub-agent completes its task independently.
 
+**New (May 2026):** Sub-agents operate within a single Claude Code session, sharing its overall context for parallelizing work within a bounded scope. Parallel agent teams, however, are fully independent Claude Code sessions, each with its own 200K-token context window, designed for more advanced, multi-platform operations and multiplying throughput. Choose between sub-agents for in-session parallelization and independent agent teams for complex, multi-session, high-throughput workflows.
+
 ### Role-Based Agent Configuration
 
 Effective parallel setups from r/claude discussions:
@@ -99,10 +103,11 @@ Effective parallel setups from r/claude discussions:
 │ Worker │  │ Worker │   │ Worker │   │ Worker │
 │(Sonnet)│  │(Sonnet)│   │(Sonnet)│   │(Sonnet)│
 │Frontend│  │Backend │   │ Tests  │   │  Docs  │
-└────────┘  └────────┘   └────────┘   └────────┘
+└────────┘  └────────┘   └────────┘  └────────┘
 ```
 
 **New (March 2026):** Sub-agents are specialized workers spawned by the main session, each operating in its own isolated context with personalized system prompts and tools. This approach prevents context pollution of the main conversation, enables parallel execution, and allows for task specialization. Delegate research or focused development tasks to sub-agents to keep the main agent's context clean. Configure sub-agents with specific tools and models (e.g., Haiku for speed) relevant to their specialized function.
+**New (May 2026):** Sub-agents are separate AI instances with isolated context windows, their own memory, tool permissions, and persistent knowledge. They are spawned by a parent agent to handle specific tasks, reporting results back to the main conversation, and are crucial for specialized domain expertise. Create specialized sub-agents with tailored prompts and tools to delegate complex, domain-specific tasks and maintain a focused main conversation.
 
 ### Agent Definition Best Practices
 
@@ -137,6 +142,14 @@ Instead of complex orchestration frameworks, use a **shared planning document**:
 **New (March 2026):**
 - **agent-mux:** A skill and SDK (CLI wrappers) for Claude Code that enables subagents to use other subagents, supporting nested agent structures.
 - **ClaudeFast Code Kit:** Implements a plan-then-execute pipeline with its `/team-build` command, coordinating 18 specialized agents through dependency chains for organized background work and eliminating blocking.
+**New (May 2026):**
+- **multi-agent-squad:** A production-ready multi-agent orchestration framework for Claude Code.
+- **Agent-Fusion:** A multi-agent orchestration system that enables Claude Code, Codex CLI, Amazon Q Developer, and Gemini Code Assist to collaborate bidirectionally through intelligent task routing and consensus-based decision making.
+- **agent-flow:** Provides real-time visualization of Claude Code agent orchestration, allowing users to see agents think, branch, and coordinate as they work.
+- **ralph-claude-code:** Autonomous AI development loop for Claude Code with intelligent exit detection.
+- **claude-swarm:** Easily launch a Claude Code session connected to a swarm of Claude Code Agents.
+
+**New (May 2026):** There are various open-source collections of specialized AI sub-agents available, such as `claude-code-subagents-collection` and `claude-agents`, designed to enhance development workflows with domain-specific expertise. Explore existing GitHub repositories for `awesome-claude-code-agents` or `claude-code-subagents-collection` to find and integrate specialized sub-agents into your workflow.
 
 ---
 
@@ -221,6 +234,8 @@ cd ../project-tests && claude
 
 **New (March 2026):** For scheduled tasks, write specific instructions in CLAUDE.md, such as 'Read all PDF and DOCX files in ~/inbox/, classify them by content type using the rules in .claude-md, move them to the appropriate subfolder in ~/sorted/, and generate a summary report' instead of vague commands.
 
+**New (May 2026):** CLAUDE.md serves as a brand context file, encompassing brand overview, target audiences, voice guidelines, and performance data. Unlike other configurations, Claude Code automatically reads CLAUDE.md at the start of every session, making the agent instantly brand-aware without extra setup. Define your brand's core information and guidelines within a CLAUDE.md file to ensure your Claude agent consistently operates with brand awareness.
+
 ### Anti-Patterns to Avoid
 
 - Bloated files that Claude ignores
@@ -241,6 +256,7 @@ cd ../project-tests && claude
 **New (March 2026):**
 5. **Optimizing Token Usage through Sub-Agent Delegation:** Identify routine or context-heavy operations (e.g., Git operations, specific data parsing) and implement sub-agents that use dedicated scripts or tools to handle them, reducing the main agent's token consumption.
 6. **Minimizing Context Window Pressure with Small Contexts:** To prevent 'context rot' and degraded model performance, instruct agents to locate and focus only on relevant files using tools like `grep` or `find`, rather than feeding the entire codebase.
+**New (May 2026):** The `/insights` command helps in identifying 'wasted token loops' where Claude might be re-explaining information it should already know. This highlights the importance of effective prompting and context management to reduce unnecessary token consumption and improve efficiency. Regularly review `/insights` reports to pinpoint and rectify context management inefficiencies, such as repetitive explanations, to save tokens.
 
 ### Context Cost Comparison
 
@@ -261,6 +277,7 @@ Sub-agents have **temporary context windows**. Craft invocations that are:
 ### Structured Memory System
 
 **New (March 2026):** Traditional flat `MEMORY.md` files have limitations (200-line cap, no structure, no session continuity, no multi-agent coordination). A structured directory of markdown files, including an index `MEMORY.md` pointing to topic files and an `active-work.md` for multi-agent coordination, can significantly improve context management. Create a `memory/` directory in your Claude project config. Populate it with an index `MEMORY.md` and topic-specific markdown files. Include an `active-work.md` for agents to update their current tasks, and instruct Claude via `CLAUDE.md` to continuously read and write to this context layer.
+**New (May 2026):** The `claude-code-semantic-memory` project offers a persistent semantic memory system for Claude Code, which can significantly enhance context management by allowing agents to build up memory over time and maintain a more consistent understanding across sessions. Investigate and integrate `claude-code-semantic-memory` or similar tools to provide your Claude Code agents with persistent memory for improved long-term context.
 
 ---
 
@@ -295,28 +312,28 @@ Batch processing → API with smart routing
 
 Run this review on the **1st of each month**:
 
-1. **Search r/claude for new tips:**
-   ```
-   Search queries:
-   - "cost optimization" site:reddit.com/r/claude
-   - "parallel agents" site:reddit.com/r/claude
-   - "worktree" site:reddit.com/r/claudeai
-   - "CLAUDE.md tips" site:reddit.com/r/claude
-   ```
+1.  **Search r/claude for new tips:**
+    ```
+    Search queries:
+    - "cost optimization" site:reddit.com/r/claude
+    - "parallel agents" site:reddit.com/r/claude
+    - "worktree" site:reddit.com/r/claudeai
+    - "CLAUDE.md tips" site:reddit.com/r/claude
+    ```
 
-2. **Check official docs for updates:**
-   - https://code.claude.com/docs/en/best-practices
-   - https://code.claude.com/docs/en/agent-teams
-   - https://code.claude.com/docs/en/costs
+2.  **Check official docs for updates:**
+    -   https://code.claude.com/docs/en/best-practices
+    -   https://code.claude.com/docs/en/agent-teams
+    -   https://code.claude.com/docs/en/costs
 
-3. **Review community tools:**
-   - Check GitHub stars/activity for mentioned tools
-   - Look for new orchestration frameworks
+3.  **Review community tools:**
+    -   Check GitHub stars/activity for mentioned tools
+    -   Look for new orchestration frameworks
 
-4. **Update this document:**
-   - Add new techniques with source attribution
-   - Remove outdated practices
-   - Update cost ratios if pricing changes
+4.  **Update this document:**
+    -   Add new techniques with source attribution
+    -   Remove outdated practices
+    -   Update cost ratios if pricing changes
 
 ### Tracking Changes
 
@@ -354,6 +371,10 @@ git log --oneline -- PARALLEL_CODING_BEST_PRACTICES.md
 - The Complete Guide to CLAUDE.md, February 2026
 - YouTube, March 2026
 - 稀土掘金, February 2026
+- r/claudeai, March 2026
+- r/claude, March 2026
+- r/claudeai, April 2026
+- https://github.com/jqueryscript/awesome-claude-code
 
 ---
 
