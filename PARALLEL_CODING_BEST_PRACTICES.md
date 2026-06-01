@@ -1,6 +1,6 @@
 # Parallel Autonomous Coding with Claude: Best Practices
 
-> **Last Updated:** 2026-03-09
+> **Last Updated:** 2026-06-01
 > **Source:** Community insights from r/claude, r/claudeai, and developer blogs
 > **Review Schedule:** Monthly (see [Review Process](#review-process))
 
@@ -137,6 +137,11 @@ Instead of complex orchestration frameworks, use a **shared planning document**:
 **New (March 2026):**
 - **agent-mux:** A skill and SDK (CLI wrappers) for Claude Code that enables subagents to use other subagents, supporting nested agent structures.
 - **ClaudeFast Code Kit:** Implements a plan-then-execute pipeline with its `/team-build` command, coordinating 18 specialized agents through dependency chains for organized background work and eliminating blocking.
+**New (June 2026):**
+- **OpenClaw:** Allows a main instance to delegate specialized tasks to sub-agents, multiplying throughput through parallelization.
+- **ClawHub:** A platform compatible with a collection of Claude Skills.
+- **Septim Agents Pack:** A collection of 15 named Claude Code sub-agents (Atlas, Luca, Canon, Ember, Tally, Nova, Ward, Mira, Juno, Pip, Hart, Halo, Beacon, Loom, Lynx) covering the full executive layer, designed to be integrated into ~/.claude/agents/.
+- **Playwright:** Used to provide Claude agents with web browser capabilities for headless browser automation.
 
 ---
 
@@ -187,9 +192,9 @@ cd ../project-tests && claude
 
 ### Core Principles
 
-1. **Keep it concise** - For each line, ask "Would removing this cause Claude to make mistakes?" If not, cut it.
-2. **Human-readable** - No special format required
-3. **Project-specific** - Focus on YOUR project's patterns
+1.  **Keep it concise** - For each line, ask "Would removing this cause Claude to make mistakes?" If not, cut it.
+2.  **Human-readable** - No special format required
+3.  **Project-specific** - Focus on YOUR project's patterns
 
 ### Recommended Structure
 
@@ -234,13 +239,13 @@ cd ../project-tests && claude
 
 ### Token Conservation Techniques
 
-1. **Use `/clear` frequently** - Wipe context when switching tasks
-2. **Disable unused MCP servers** - Each adds tool definitions to context (`/mcp` to manage)
-3. **Prefer CLI over MCP** - `gh`, `aws`, `gcloud` don't add context overhead
-4. **Enable sandbox mode** - Reduces permission prompts (`/sandbox`)
+1.  **Use `/clear` frequently** - Wipe context when switching tasks
+2.  **Disable unused MCP servers** - Each adds tool definitions to context (`/mcp` to manage)
+3.  **Prefer CLI over MCP** - `gh`, `aws`, `gcloud` don't add context overhead
+4.  **Enable sandbox mode** - Reduces permission prompts (`/sandbox`)
 **New (March 2026):**
-5. **Optimizing Token Usage through Sub-Agent Delegation:** Identify routine or context-heavy operations (e.g., Git operations, specific data parsing) and implement sub-agents that use dedicated scripts or tools to handle them, reducing the main agent's token consumption.
-6. **Minimizing Context Window Pressure with Small Contexts:** To prevent 'context rot' and degraded model performance, instruct agents to locate and focus only on relevant files using tools like `grep` or `find`, rather than feeding the entire codebase.
+5.  **Optimizing Token Usage through Sub-Agent Delegation:** Identify routine or context-heavy operations (e.g., Git operations, specific data parsing) and implement sub-agents that use dedicated scripts or tools to handle them, reducing the main agent's token consumption.
+6.  **Minimizing Context Window Pressure with Small Contexts:** To prevent 'context rot' and degraded model performance, instruct agents to locate and focus only on relevant files using tools like `grep` or `find`, rather than feeding the entire codebase.
 
 ### Context Cost Comparison
 
@@ -295,28 +300,28 @@ Batch processing → API with smart routing
 
 Run this review on the **1st of each month**:
 
-1. **Search r/claude for new tips:**
-   ```
-   Search queries:
-   - "cost optimization" site:reddit.com/r/claude
-   - "parallel agents" site:reddit.com/r/claude
-   - "worktree" site:reddit.com/r/claudeai
-   - "CLAUDE.md tips" site:reddit.com/r/claude
-   ```
+1.  **Search r/claude for new tips:**
+    ```
+    Search queries:
+    - "cost optimization" site:reddit.com/r/claude
+    - "parallel agents" site:reddit.com/r/claude
+    - "worktree" site:reddit.com/r/claudeai
+    - "CLAUDE.md tips" site:reddit.com/r/claude
+    ```
 
-2. **Check official docs for updates:**
-   - https://code.claude.com/docs/en/best-practices
-   - https://code.claude.com/docs/en/agent-teams
-   - https://code.claude.com/docs/en/costs
+2.  **Check official docs for updates:**
+    - https://code.claude.com/docs/en/best-practices
+    - https://code.claude.com/docs/en/agent-teams
+    - https://code.claude.com/docs/en/costs
 
-3. **Review community tools:**
-   - Check GitHub stars/activity for mentioned tools
-   - Look for new orchestration frameworks
+3.  **Review community tools:**
+    - Check GitHub stars/activity for mentioned tools
+    - Look for new orchestration frameworks
 
-4. **Update this document:**
-   - Add new techniques with source attribution
-   - Remove outdated practices
-   - Update cost ratios if pricing changes
+4.  **Update this document:**
+    - Add new techniques with source attribution
+    - Remove outdated practices
+    - Update cost ratios if pricing changes
 
 ### Tracking Changes
 
@@ -354,12 +359,16 @@ git log --oneline -- PARALLEL_CODING_BEST_PRACTICES.md
 - The Complete Guide to CLAUDE.md, February 2026
 - YouTube, March 2026
 - 稀土掘金, February 2026
+- OpenClaw
+- ClawHub
+- Septim Agents Pack (github.com/septimlabs-code/septim-agents-pack-sample)
+- Playwright
 
 ---
 
 ## Contributing
 
 Found a new tip on r/claude? Open a PR with:
-1. The technique/tip
-2. Source link
-3. Your experience using it (optional)
+1.  The technique/tip
+2.  Source link
+3.  Your experience using it (optional)
